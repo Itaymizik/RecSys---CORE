@@ -44,6 +44,7 @@ python main.py --model MODEL --dataset DATASET
 `MODEL` can be one of
 * `trm`
 * `ave`
+* `trm_contrastive`
 
 ## Results
 

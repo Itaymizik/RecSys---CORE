@@ -11,26 +11,26 @@ from improvments.core_trm_enhanced import COREtrmEnhanced
 from improvments.core_trm_dual_attention import COREtrmDualAttention
 from improvments.core_trm_enhanced_pe import COREtrmEnhancedPE
 from improvments.core_trm_hard_negatives import COREtrmHardNeg
+from improvments.core_trm_contrastive import COREtrmContrastive
+
+MODEL_CLASSES = {
+    'ave': COREave,
+    'trm': COREtrm,
+    'trm_enhanced': COREtrmEnhanced,
+    'trm_dual_attention': COREtrmDualAttention,
+    'trm_enhanced_pe': COREtrmEnhancedPE,
+    'trm_hard_negatives': COREtrmHardNeg,
+    'trm_contrastive': COREtrmContrastive,
+}
+SUPPORTED_MODELS = list(MODEL_CLASSES.keys())
+SUPPORTED_MODELS_HELP = ', '.join(SUPPORTED_MODELS)
 
 
 def run_single_model(args):
     # configurations initialization
-    if args.model == 'ave':
-        model_class = COREave
-    elif args.model == 'trm':
-        model_class = COREtrm
-    elif args.model == 'trm_enhanced':
-        model_class = COREtrmEnhanced
-    elif args.model == 'trm_dual_attention':
-        model_class = COREtrmDualAttention
-    elif args.model == 'trm_enhanced_pe':
-        model_class = COREtrmEnhancedPE
-    elif args.model == 'trm_hard_negatives':
-        model_class = COREtrmHardNeg
-    else:
-        model_class = COREtrm
+    model_class = MODEL_CLASSES.get(args.model, COREtrm)
     
-    config_file = f'props/core_{args.model}.yaml' if args.model in ['ave', 'trm', 'trm_enhanced', 'trm_dual_attention', 'trm_enhanced_pe', 'trm_hard_negatives'] else 'props/core_trm.yaml'
+    config_file = f'props/core_{args.model}.yaml' if args.model in SUPPORTED_MODELS else 'props/core_trm.yaml'
     
     config = Config(
         model=model_class,
@@ -60,20 +60,10 @@ def run_single_model(args):
 
         train_data, valid_data, test_data = data_preparation(cfg, dataset)
 
-        if args.model == 'ave':
-            model = COREave(cfg, train_data.dataset).to(cfg['device'])
-        elif args.model == 'trm':
-            model = COREtrm(cfg, train_data.dataset).to(cfg['device'])
-        elif args.model == 'trm_enhanced':
-            model = COREtrmEnhanced(cfg, train_data.dataset).to(cfg['device'])
-        elif args.model == 'trm_dual_attention':
-            model = COREtrmDualAttention(cfg, train_data.dataset).to(cfg['device'])
-        elif args.model == 'trm_enhanced_pe':
-            model = COREtrmEnhancedPE(cfg, train_data.dataset).to(cfg['device'])
-        elif args.model == 'trm_hard_negatives':
-            model = COREtrmHardNeg(cfg, train_data.dataset).to(cfg['device'])
+        if args.model in MODEL_CLASSES:
+            model = MODEL_CLASSES[args.model](cfg, train_data.dataset).to(cfg['device'])
         else:
-            raise ValueError('model can only be "ave", "trm", "trm_enhanced", "trm_dual_attention", "trm_enhanced_pe", or "trm_hard_negatives".')
+            raise ValueError(f'model can only be {SUPPORTED_MODELS_HELP}.')
         logger.info(model)
 
         trainer = get_trainer(cfg['MODEL_TYPE'], cfg['model'])(cfg, model)
@@ -136,7 +126,7 @@ def run_single_model(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, default='trm', help='ave, trm, trm_enhanced, trm_dual_attention, trm_enhanced_pe, or trm_hard_negatives')
+    parser.add_argument('--model', type=str, default='trm', help=SUPPORTED_MODELS_HELP)
     parser.add_argument('--dataset', type=str, default='diginetica', help='diginetica, nowplaying, retailrocket, tmall, yoochoose')
     parser.add_argument('--sweep-dropout', dest='sweep_dropout', action='store_true', help='If set, sweep item_dropout over predefined rhos')
     parser.add_argument('--temperature', type=float, default=None, help='Override temperature (tau) in config')
