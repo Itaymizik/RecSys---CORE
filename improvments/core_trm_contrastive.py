@@ -34,7 +34,10 @@ class COREtrmContrastive(COREtrm):
         drop_mask = (drop_prob < self.cl_dropout) & mask
         last_pos = (seq_lengths - 1).clamp(min=0)
         # Preserve the last item so the augmented view keeps the prediction target.
-        drop_mask[torch.arange(item_seq.size(0), device=item_seq.device), last_pos] = False
+        valid_rows = seq_lengths > 0
+        if valid_rows.any():
+            batch_indices = torch.arange(item_seq.size(0), device=item_seq.device)[valid_rows]
+            drop_mask[batch_indices, last_pos[valid_rows]] = False
         item_seq = item_seq.masked_fill(drop_mask, 0)
         return item_seq
 

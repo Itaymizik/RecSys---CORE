@@ -14,7 +14,7 @@ This document describes the enhancements made to the CORE-TRM model to surpass t
 - **Normalized dot-product decoding:** Stable cosine similarity with temperature scaling.
 
 ### Why Existing Improvements Stayed Flat
-The improvements in the `improvments/` folder (typo preserved in repo) do not change the learning signal that dominates performance:
+The improvements in the `improvements` folder (`improvments/` in this repo) do not change the learning signal that dominates performance:
 - **Multi-layer aggregation & dual attention** still produce a session vector trained only with the same cross-entropy objective, so the model’s decision boundary stays similar.
 - **Relative/context-aware position encodings** add parameters but do not add new supervision; with short sessions they often behave like the baseline positional bias.
 - **Hard negatives** can be noisy in sparse session datasets, and without stronger positives they may cancel any gains.
