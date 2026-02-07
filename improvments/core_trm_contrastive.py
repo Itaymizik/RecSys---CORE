@@ -8,7 +8,8 @@ class COREtrmContrastive(COREtrm):
     """CORE-trm with CL4SRec-style contrastive learning on augmented sessions.
 
     Note: contrastive loss is applied only when batch_size > 1 because
-    InfoNCE needs in-batch negatives to avoid degenerate loss.
+    InfoNCE needs in-batch negatives to avoid degenerate loss. It adds
+    extra forward passes for augmented views, increasing training cost.
     """
 
     def __init__(self, config, dataset):
@@ -18,7 +19,10 @@ class COREtrmContrastive(COREtrm):
         self.cl_dropout = config.get('cl_dropout', 0.2)
         self.cl_temperature = config.get('cl_temperature', 0.2)
         if not 0 <= self.cl_dropout < 1:
-            raise ValueError(f'cl_dropout must be in [0, 1), got {self.cl_dropout}.')
+            raise ValueError(
+                f'cl_dropout must be in [0, 1); values >= 1 would mask nearly all items '
+                f'(got {self.cl_dropout}).'
+            )
 
     def augment_item_seq(self, item_seq):
         if self.cl_dropout == 0:
