@@ -7,7 +7,8 @@ from core_trm import COREtrm
 class COREtrmContrastive(COREtrm):
     """CORE-trm with CL4SRec-style contrastive learning on augmented sessions.
 
-    Note: contrastive loss is applied only when batch_size > 1.
+    Note: contrastive loss is applied only when batch_size > 1 because
+    InfoNCE needs in-batch negatives to avoid degenerate loss.
     """
 
     def __init__(self, config, dataset):
@@ -30,6 +31,7 @@ class COREtrmContrastive(COREtrm):
         drop_mask = (drop_prob < self.cl_dropout) & mask
         seq_lengths = mask.sum(dim=1)
         last_pos = (seq_lengths - 1).clamp(min=0)
+        # Preserve the last item so the augmented view keeps the prediction target.
         drop_mask[torch.arange(item_seq.size(0), device=item_seq.device), last_pos] = False
         item_seq = item_seq.masked_fill(drop_mask, 0)
         return item_seq
@@ -39,6 +41,7 @@ class COREtrmContrastive(COREtrm):
         view_b = F.normalize(view_b, dim=-1)
         logits = torch.matmul(view_a, view_b.transpose(0, 1)) / self.cl_temperature
         labels = torch.arange(view_a.size(0), device=view_a.device)
+        # Symmetric InfoNCE: treat each view as both anchor and positive.
         loss_a = F.cross_entropy(logits, labels)
         loss_b = F.cross_entropy(logits.transpose(0, 1), labels)
         return 0.5 * (loss_a + loss_b)
