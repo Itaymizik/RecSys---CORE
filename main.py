@@ -4,12 +4,13 @@ from recbole.config import Config
 from recbole.data import create_dataset, data_preparation
 from recbole.utils import init_logger, get_trainer, init_seed, set_color
 
+
 from core_ave import COREave
 from core_trm import COREtrm
-from core_trm_enhanced import COREtrmEnhanced
-from core_trm_dual_attention import COREtrmDualAttention
-from core_trm_enhanced_pe import COREtrmEnhancedPE
-from core_trm_hard_negatives import COREtrmHardNeg
+from improvments.core_trm_enhanced import COREtrmEnhanced
+from improvments.core_trm_dual_attention import COREtrmDualAttention
+from improvments.core_trm_enhanced_pe import COREtrmEnhancedPE
+from improvments.core_trm_hard_negatives import COREtrmHardNeg
 
 
 def run_single_model(args):
