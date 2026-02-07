@@ -11,6 +11,7 @@ from improvments.core_trm_enhanced import COREtrmEnhanced
 from improvments.core_trm_dual_attention import COREtrmDualAttention
 from improvments.core_trm_enhanced_pe import COREtrmEnhancedPE
 from improvments.core_trm_hard_negatives import COREtrmHardNeg
+from improvments.core_trm_contrastive import COREtrmContrastive
 
 
 def run_single_model(args):
@@ -27,10 +28,12 @@ def run_single_model(args):
         model_class = COREtrmEnhancedPE
     elif args.model == 'trm_hard_negatives':
         model_class = COREtrmHardNeg
+    elif args.model == 'trm_contrastive':
+        model_class = COREtrmContrastive
     else:
         model_class = COREtrm
     
-    config_file = f'props/core_{args.model}.yaml' if args.model in ['ave', 'trm', 'trm_enhanced', 'trm_dual_attention', 'trm_enhanced_pe', 'trm_hard_negatives'] else 'props/core_trm.yaml'
+    config_file = f'props/core_{args.model}.yaml' if args.model in ['ave', 'trm', 'trm_enhanced', 'trm_dual_attention', 'trm_enhanced_pe', 'trm_hard_negatives', 'trm_contrastive'] else 'props/core_trm.yaml'
     
     config = Config(
         model=model_class,
@@ -72,8 +75,10 @@ def run_single_model(args):
             model = COREtrmEnhancedPE(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_hard_negatives':
             model = COREtrmHardNeg(cfg, train_data.dataset).to(cfg['device'])
+        elif args.model == 'trm_contrastive':
+            model = COREtrmContrastive(cfg, train_data.dataset).to(cfg['device'])
         else:
-            raise ValueError('model can only be "ave", "trm", "trm_enhanced", "trm_dual_attention", "trm_enhanced_pe", or "trm_hard_negatives".')
+            raise ValueError('model can only be "ave", "trm", "trm_enhanced", "trm_dual_attention", "trm_enhanced_pe", "trm_hard_negatives", or "trm_contrastive".')
         logger.info(model)
 
         trainer = get_trainer(cfg['MODEL_TYPE'], cfg['model'])(cfg, model)
@@ -136,7 +141,7 @@ def run_single_model(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, default='trm', help='ave, trm, trm_enhanced, trm_dual_attention, trm_enhanced_pe, or trm_hard_negatives')
+    parser.add_argument('--model', type=str, default='trm', help='ave, trm, trm_enhanced, trm_dual_attention, trm_enhanced_pe, trm_hard_negatives, or trm_contrastive')
     parser.add_argument('--dataset', type=str, default='diginetica', help='diginetica, nowplaying, retailrocket, tmall, yoochoose')
     parser.add_argument('--sweep-dropout', dest='sweep_dropout', action='store_true', help='If set, sweep item_dropout over predefined rhos')
     parser.add_argument('--temperature', type=float, default=None, help='Override temperature (tau) in config')

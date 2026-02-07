@@ -6,6 +6,21 @@ This document describes the enhancements made to the CORE-TRM model to surpass t
 **Baseline Results (Diginetica):**
 - CORE-trm: R@20: 52.89, MRR@20: 18.58
 
+## Architecture Recap & Improvement Audit
+
+### CORE-trm Baseline (What Works)
+- **Two-path encoder:** Transformer-based attention captures global dependencies, while average pooling preserves representation consistency.
+- **Explicit position injection:** Attention weights are computed from both content and position embeddings.
+- **Normalized dot-product decoding:** Stable cosine similarity with temperature scaling.
+
+### Why Existing Improvements Stayed Flat
+The improvements in `improvments/` do not change the learning signal that dominates performance:
+- **Multi-layer aggregation & dual attention** still produce a session vector trained only with the same cross-entropy objective, so the model’s decision boundary stays similar.
+- **Relative/context-aware position encodings** add parameters but do not add new supervision; with short sessions they often behave like the baseline positional bias.
+- **Hard negatives** can be noisy in sparse session datasets, and without stronger positives they may cancel any gains.
+
+To improve results in a consistent, practical way, we need **additional supervision that shapes the session embedding space** rather than just changing aggregation.
+
 ## Key Improvements
 
 ### 1. Multi-Layer Aggregation 🎯
@@ -70,12 +85,34 @@ total_loss = ce_loss + λ * hard_neg_loss
 
 ---
 
+### 4. Contrastive Session Augmentation (CL4SRec / CoSeRec) ✅
+**Problem:** All previous variants rely solely on next-item CE loss, which often under-regularizes session representations.
+
+**Solution:** Add a lightweight contrastive loss on **two augmented views** of each session (random item masking), following CL4SRec/CoSeRec-style self-supervision.
+```python
+aug_a = random_item_mask(item_seq)
+aug_b = random_item_mask(item_seq)
+loss = ce_loss + λ * info_nce(encoder(aug_a), encoder(aug_b))
+```
+
+**Why it works:**
+- Encourages invariance to small session perturbations
+- Improves generalization without changing inference path
+- Proven gains on session-based benchmarks in recent studies (WWW 2021–2024)
+
+**Expected gain:** +0.7-1.5% R@20 and +0.5-1.2% MRR@20 with minimal tuning
+
+---
+
 ## How to Run
 
 ### Basic Training
 ```bash
 # Train enhanced model on Diginetica
 python main.py --model trm_enhanced --dataset diginetica
+
+# Train contrastive model
+python main.py --model trm_contrastive --dataset diginetica
 
 # Train on other datasets
 python main.py --model trm_enhanced --dataset yoochoose
@@ -127,6 +164,14 @@ use_hard_negatives: true
 hard_neg_weight: 0.5  # Try [0.3, 0.5, 0.7, 1.0]
 ```
 
+Contrastive setup in [props/core_trm_contrastive.yaml](props/core_trm_contrastive.yaml):
+```yaml
+use_contrastive: true
+cl_weight: 0.1       # Try [0.05, 0.1, 0.2]
+cl_dropout: 0.2      # Item masking ratio
+cl_temperature: 0.2  # InfoNCE temperature
+```
+
 ---
 
 ## Expected Results
@@ -143,7 +188,7 @@ hard_neg_weight: 0.5  # Try [0.3, 0.5, 0.7, 1.0]
 
 ## Further Improvements (Future Work)
 
-### 4. Relative Positional Encoding
+### 5. Relative Positional Encoding
 Replace absolute positions with relative positions:
 ```python
 # Instead of position[i], use position[i] - position[j]
@@ -151,7 +196,7 @@ relative_pos = pos_ids.unsqueeze(1) - pos_ids.unsqueeze(2)
 ```
 **Benefit:** Better handles variable-length sessions and captures item-to-item relationships.
 
-### 5. EMA Target Embeddings
+### 6. EMA Target Embeddings
 Use momentum-updated target embeddings:
 ```python
 # Slow-moving target
@@ -159,18 +204,18 @@ target_emb = momentum * target_emb_old + (1-momentum) * current_emb
 ```
 **Benefit:** More stable training and better contrastive learning.
 
-### 6. Multi-Task Learning
+### 7. Multi-Task Learning
 Add auxiliary tasks:
 - Next-item prediction (predict item at position t+1)
 - Session length prediction
 - Item order prediction (predict if sequence is shuffled)
 
-### 7. Longer Sequences
+### 8. Longer Sequences
 The paper uses relatively short sequences. Try:
 - Increase `MAX_ITEM_LIST_LENGTH` to 100 or 150
 - Add hierarchical attention for long sequences
 
-### 8. Label Smoothing
+### 9. Label Smoothing
 ```python
 # Soften the hard targets
 loss = CrossEntropyLoss(label_smoothing=0.1)
@@ -204,6 +249,11 @@ python main.py --model trm_enhanced --dataset diginetica --use-hard-negatives fa
 | TRM+AVE fusion | Fixed addition | Learnable gating |
 | Loss function | Cross-entropy | CE + Hard negatives |
 | Position encoding | Absolute | Absolute (rel. pos. future) |
+
+| Component | CORE-trm (baseline) | CORE-trm-contrastive |
+|-----------|-------------------|----------------------|
+| Supervision | CE only | CE + InfoNCE (augmented views) |
+| Augmentation | None | Random item masking |
 
 ---
 
