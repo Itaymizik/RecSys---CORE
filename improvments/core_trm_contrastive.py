@@ -5,7 +5,10 @@ from core_trm import COREtrm
 
 
 class COREtrmContrastive(COREtrm):
-    """CORE-trm with CL4SRec-style contrastive learning on augmented sessions."""
+    """CORE-trm with CL4SRec-style contrastive learning on augmented sessions.
+
+    Note: contrastive loss is applied only when batch_size > 1.
+    """
 
     def __init__(self, config, dataset):
         super().__init__(config, dataset)
@@ -13,9 +16,11 @@ class COREtrmContrastive(COREtrm):
         self.cl_weight = config['cl_weight'] if 'cl_weight' in config else 0.1
         self.cl_dropout = config['cl_dropout'] if 'cl_dropout' in config else 0.2
         self.cl_temperature = config['cl_temperature'] if 'cl_temperature' in config else 0.2
+        if not 0 <= self.cl_dropout < 1:
+            raise ValueError('cl_dropout must be in [0, 1).')
 
     def augment_item_seq(self, item_seq):
-        if self.cl_dropout <= 0:
+        if self.cl_dropout == 0:
             return item_seq
         item_seq = item_seq.clone()
         mask = item_seq.gt(0)
