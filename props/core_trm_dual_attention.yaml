@@ -1,0 +1,30 @@
+# Configuration for CORE-trm with Dual Attention Mechanism
+# Combines global session context with recent-item emphasis
+
+# Model Architecture
+embedding_size: 64
+n_layers: 1
+n_heads: 2
+inner_size: 256
+
+# Dropout Configuration
+hidden_dropout_prob: 0.2
+attn_dropout_prob: 0.2
+sess_dropout: 0.2
+item_dropout: 0.25  # Tuned based on dropout sweep results
+
+# Activation and Normalization
+hidden_act: 'gelu'
+layer_norm_eps: 1e-12
+initializer_range: 0.02
+
+# Dual Attention Specific Parameters
+use_dual_gating: True  # Use learnable gating (vs fixed weights)
+global_weight: 0.6     # Only used if use_dual_gating=False
+recent_weight: 0.4     # Only used if use_dual_gating=False
+
+# Temperature for RDM (Robust Distance Measuring)
+temperature: 0.07
+
+# Loss Configuration
+loss_type: 'CE'

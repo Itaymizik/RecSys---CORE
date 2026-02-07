@@ -34,14 +34,21 @@ class TransNet(nn.Module):
 
         self.LayerNorm = nn.LayerNorm(self.hidden_size, eps=self.layer_norm_eps)
         self.dropout = nn.Dropout(self.hidden_dropout_prob)
-        self.fn = nn.Linear(self.hidden_size, 1)
+
+        # --- SHIFT: Modern MLP Activation ---
+        # 1. הקלט: תוכן + מיקום (כפי שהוכח כיעיל בשלב 8)
+        # 2. אקטיבציה: GELU במקום Tanh
+        self.fn = nn.Sequential(
+            nn.Linear(self.hidden_size * 2, self.hidden_size),
+            nn.GELU(),  # Modern activation function
+            nn.Linear(self.hidden_size, 1)
+        )
 
         self.apply(self._init_weights)
 
     def get_attention_mask(self, item_seq, bidirectional=False):
-        """Generate left-to-right uni-directional or bidirectional attention mask for multi-head attention."""
         attention_mask = (item_seq != 0)
-        extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)  # torch.bool
+        extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
         if not bidirectional:
             extended_attention_mask = torch.tril(extended_attention_mask.expand((-1, -1, item_seq.size(-1), -1)))
         extended_attention_mask = torch.where(extended_attention_mask, 0., -10000.)
@@ -52,9 +59,10 @@ class TransNet(nn.Module):
 
         position_ids = torch.arange(item_seq.size(1), dtype=torch.long, device=item_seq.device)
         position_ids = position_ids.unsqueeze(0).expand_as(item_seq)
-        position_embedding = self.position_embedding(position_ids)
+        
+        pos_emb = self.position_embedding(position_ids)
 
-        input_emb = item_emb + position_embedding
+        input_emb = item_emb + pos_emb
         input_emb = self.LayerNorm(input_emb)
         input_emb = self.dropout(input_emb)
 
@@ -63,16 +71,16 @@ class TransNet(nn.Module):
         trm_output = self.trm_encoder(input_emb, extended_attention_mask, output_all_encoded_layers=True)
         output = trm_output[-1]
 
-        alpha = self.fn(output).to(torch.double)
+        # Explicit Position Injection (Step 8 logic)
+        combined_input = torch.cat((output, pos_emb), dim=-1)
+
+        alpha = self.fn(combined_input).to(torch.double)
         alpha = torch.where(mask.unsqueeze(-1), alpha, -9e15)
         alpha = torch.softmax(alpha, dim=1, dtype=torch.float)
         return alpha
 
     def _init_weights(self, module):
-        """ Initialize the weights """
         if isinstance(module, (nn.Linear, nn.Embedding)):
-            # Slightly different from the TF version which uses truncated_normal for initialization
-            # cf https://github.com/pytorch/pytorch/pull/5617
             module.weight.data.normal_(mean=0.0, std=self.initializer_range)
         elif isinstance(module, nn.LayerNorm):
             module.bias.data.zero_()
@@ -85,11 +93,24 @@ class COREtrm(COREave):
     def __init__(self, config, dataset):
         super(COREtrm, self).__init__(config, dataset)
         self.net = TransNet(config, dataset)
+        # ניקוי פרמטרים של רעש/שערים - חוזרים לבסיס היציב
 
     def forward(self, item_seq):
-        x = self.item_embedding(item_seq)
-        x = self.sess_dropout(x)
-        alpha = self.net(item_seq, x)
-        seq_output = torch.sum(alpha * x, dim=1)
+        x_clean = self.item_embedding(item_seq)
+        x_noisy = self.sess_dropout(x_clean)
+        
+        # נתיב A: Transformer (עם ה-MLP המשופר)
+        alpha_trm = self.net(item_seq, x_clean)
+        trm_output = torch.sum(alpha_trm * x_noisy, dim=1)
+        
+        # נתיב B: Average (Residual)
+        alpha_ave = self.ave_net(item_seq)
+        ave_output = torch.sum(alpha_ave * x_noisy, dim=1)
+        
+        # חיבור שיורי
+        seq_output = trm_output + ave_output
+        
         seq_output = F.normalize(seq_output, dim=-1)
         return seq_output
+
+### changed #11 21\12 18:34

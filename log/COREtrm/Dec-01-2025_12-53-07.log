@@ -1,0 +1,239 @@
+Mon 01 Dec 2025 12:53:07 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = dataset/yoochoose
+checkpoint_dir = saved
+show_progress = True
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 20
+train_batch_size = 2048
+learner = adam
+learning_rate = 0.001
+neg_sampling = None
+eval_step = 1
+stopping_step = 5
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'order': 'TO', 'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'mode': 'full'}
+repeatable = True
+metrics = ['Recall', 'MRR']
+topk = [20]
+valid_metric = MRR@20
+valid_metric_bigger = True
+eval_batch_size = 2048
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = session_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = None
+NEG_PREFIX = neg_
+load_col = {'inter': ['session_id', 'item_id_list', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = ['item_id_list']
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = None
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = ['train', 'valid', 'test']
+
+Other Hyper Parameters: 
+wandb_project = recbole
+require_pow = False
+MODEL_TYPE = ModelType.SEQUENTIAL
+device = cuda
+embedding_size = 100
+inner_size = 256
+n_layers = 2
+n_heads = 2
+hidden_dropout_prob = 0.5
+attn_dropout_prob = 0.5
+hidden_act = gelu
+layer_norm_eps = 1e-12
+initializer_range = 0.02
+loss_type = CE
+sess_dropout = 0.2
+item_dropout = 0.2
+temperature = 0.07
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.RANKING
+train_neg_sample_args = {'strategy': 'none'}
+eval_neg_sample_args = {'strategy': 'full', 'distribution': 'uniform'}
+
+
+Mon 01 Dec 2025 12:53:26 INFO  yoochoose
+The number of users: 1434350
+Average actions of users: 1.0
+The number of items: 19690
+Average actions of items: 74.55036382536383
+The number of inters: 1434349
+The sparsity of the dataset: 99.99492128337826%
+Remain Fields: ['session_id', 'item_id_list', 'item_id', 'item_length']
+Mon 01 Dec 2025 12:53:42 INFO  [Training]: train_batch_size = [2048] negative sampling: [None]
+Mon 01 Dec 2025 12:53:42 INFO  [Evaluation]: eval_batch_size = [2048] eval_args: [{'order': 'TO', 'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'mode': 'full'}]
+Mon 01 Dec 2025 12:53:42 INFO  COREtrm(
+  (sess_dropout): Dropout(p=0.2, inplace=False)
+  (item_dropout): Dropout(p=0.2, inplace=False)
+  (item_embedding): Embedding(19690, 100, padding_idx=0)
+  (loss_fct): CrossEntropyLoss()
+  (net): TransNet(
+    (position_embedding): Embedding(50, 100)
+    (trm_encoder): TransformerEncoder(
+      (layer): ModuleList(
+        (0-1): 2 x TransformerLayer(
+          (multi_head_attention): MultiHeadAttention(
+            (query): Linear(in_features=100, out_features=100, bias=True)
+            (key): Linear(in_features=100, out_features=100, bias=True)
+            (value): Linear(in_features=100, out_features=100, bias=True)
+            (softmax): Softmax(dim=-1)
+            (attn_dropout): Dropout(p=0.5, inplace=False)
+            (dense): Linear(in_features=100, out_features=100, bias=True)
+            (LayerNorm): LayerNorm((100,), eps=1e-12, elementwise_affine=True)
+            (out_dropout): Dropout(p=0.5, inplace=False)
+          )
+          (feed_forward): FeedForward(
+            (dense_1): Linear(in_features=100, out_features=256, bias=True)
+            (dense_2): Linear(in_features=256, out_features=100, bias=True)
+            (LayerNorm): LayerNorm((100,), eps=1e-12, elementwise_affine=True)
+            (dropout): Dropout(p=0.5, inplace=False)
+          )
+        )
+      )
+    )
+    (LayerNorm): LayerNorm((100,), eps=1e-12, elementwise_affine=True)
+    (dropout): Dropout(p=0.5, inplace=False)
+    (fn): Linear(in_features=100, out_features=1, bias=True)
+  )
+)
+Trainable parameters: 2159013
+Mon 01 Dec 2025 12:54:53 INFO  epoch 0 training [time: 68.50s, train loss: 2983.0027]
+Mon 01 Dec 2025 12:54:57 INFO  epoch 0 evaluating [time: 4.10s, valid_score: 0.300900]
+Mon 01 Dec 2025 12:54:57 INFO  valid result: 
+recall@20 : 0.6581    mrr@20 : 0.3009
+Mon 01 Dec 2025 12:54:57 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 12:56:09 INFO  epoch 1 training [time: 71.81s, train loss: 2404.0495]
+Mon 01 Dec 2025 12:56:13 INFO  epoch 1 evaluating [time: 4.28s, valid_score: 0.307200]
+Mon 01 Dec 2025 12:56:13 INFO  valid result: 
+recall@20 : 0.6843    mrr@20 : 0.3072
+Mon 01 Dec 2025 12:56:13 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 12:57:26 INFO  epoch 2 training [time: 72.37s, train loss: 2320.5365]
+Mon 01 Dec 2025 12:57:30 INFO  epoch 2 evaluating [time: 4.14s, valid_score: 0.309500]
+Mon 01 Dec 2025 12:57:30 INFO  valid result: 
+recall@20 : 0.691    mrr@20 : 0.3095
+Mon 01 Dec 2025 12:57:30 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 12:58:44 INFO  epoch 3 training [time: 73.88s, train loss: 2286.8381]
+Mon 01 Dec 2025 12:58:48 INFO  epoch 3 evaluating [time: 4.32s, valid_score: 0.310000]
+Mon 01 Dec 2025 12:58:48 INFO  valid result: 
+recall@20 : 0.6946    mrr@20 : 0.31
+Mon 01 Dec 2025 12:58:49 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:00:02 INFO  epoch 4 training [time: 73.36s, train loss: 2268.9012]
+Mon 01 Dec 2025 13:00:06 INFO  epoch 4 evaluating [time: 4.29s, valid_score: 0.310500]
+Mon 01 Dec 2025 13:00:06 INFO  valid result: 
+recall@20 : 0.6961    mrr@20 : 0.3105
+Mon 01 Dec 2025 13:00:06 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:01:20 INFO  epoch 5 training [time: 73.31s, train loss: 2257.3977]
+Mon 01 Dec 2025 13:01:24 INFO  epoch 5 evaluating [time: 4.32s, valid_score: 0.310600]
+Mon 01 Dec 2025 13:01:24 INFO  valid result: 
+recall@20 : 0.6969    mrr@20 : 0.3106
+Mon 01 Dec 2025 13:01:24 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:02:38 INFO  epoch 6 training [time: 73.40s, train loss: 2250.1844]
+Mon 01 Dec 2025 13:02:42 INFO  epoch 6 evaluating [time: 4.46s, valid_score: 0.311200]
+Mon 01 Dec 2025 13:02:42 INFO  valid result: 
+recall@20 : 0.6977    mrr@20 : 0.3112
+Mon 01 Dec 2025 13:02:42 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:03:56 INFO  epoch 7 training [time: 73.88s, train loss: 2243.7428]
+Mon 01 Dec 2025 13:04:01 INFO  epoch 7 evaluating [time: 4.37s, valid_score: 0.311100]
+Mon 01 Dec 2025 13:04:01 INFO  valid result: 
+recall@20 : 0.697    mrr@20 : 0.3111
+Mon 01 Dec 2025 13:05:14 INFO  epoch 8 training [time: 73.81s, train loss: 2239.3034]
+Mon 01 Dec 2025 13:05:19 INFO  epoch 8 evaluating [time: 4.39s, valid_score: 0.311300]
+Mon 01 Dec 2025 13:05:19 INFO  valid result: 
+recall@20 : 0.6975    mrr@20 : 0.3113
+Mon 01 Dec 2025 13:05:19 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:06:33 INFO  epoch 9 training [time: 73.73s, train loss: 2235.3368]
+Mon 01 Dec 2025 13:06:37 INFO  epoch 9 evaluating [time: 4.29s, valid_score: 0.311500]
+Mon 01 Dec 2025 13:06:37 INFO  valid result: 
+recall@20 : 0.6982    mrr@20 : 0.3115
+Mon 01 Dec 2025 13:06:37 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:07:51 INFO  epoch 10 training [time: 73.50s, train loss: 2232.2042]
+Mon 01 Dec 2025 13:07:55 INFO  epoch 10 evaluating [time: 4.22s, valid_score: 0.311800]
+Mon 01 Dec 2025 13:07:55 INFO  valid result: 
+recall@20 : 0.6986    mrr@20 : 0.3118
+Mon 01 Dec 2025 13:07:55 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:09:09 INFO  epoch 11 training [time: 73.83s, train loss: 2229.7393]
+Mon 01 Dec 2025 13:09:14 INFO  epoch 11 evaluating [time: 4.35s, valid_score: 0.311400]
+Mon 01 Dec 2025 13:09:14 INFO  valid result: 
+recall@20 : 0.6985    mrr@20 : 0.3114
+Mon 01 Dec 2025 13:10:27 INFO  epoch 12 training [time: 73.61s, train loss: 2227.6652]
+Mon 01 Dec 2025 13:10:31 INFO  epoch 12 evaluating [time: 4.23s, valid_score: 0.311300]
+Mon 01 Dec 2025 13:10:31 INFO  valid result: 
+recall@20 : 0.6987    mrr@20 : 0.3113
+Mon 01 Dec 2025 13:11:45 INFO  epoch 13 training [time: 73.68s, train loss: 2223.8773]
+Mon 01 Dec 2025 13:11:49 INFO  epoch 13 evaluating [time: 4.35s, valid_score: 0.311500]
+Mon 01 Dec 2025 13:11:49 INFO  valid result: 
+recall@20 : 0.6985    mrr@20 : 0.3115
+Mon 01 Dec 2025 13:13:03 INFO  epoch 14 training [time: 73.77s, train loss: 2222.7687]
+Mon 01 Dec 2025 13:13:08 INFO  epoch 14 evaluating [time: 4.34s, valid_score: 0.312200]
+Mon 01 Dec 2025 13:13:08 INFO  valid result: 
+recall@20 : 0.6994    mrr@20 : 0.3122
+Mon 01 Dec 2025 13:13:08 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:14:21 INFO  epoch 15 training [time: 73.57s, train loss: 2220.8966]
+Mon 01 Dec 2025 13:14:26 INFO  epoch 15 evaluating [time: 4.33s, valid_score: 0.311600]
+Mon 01 Dec 2025 13:14:26 INFO  valid result: 
+recall@20 : 0.6985    mrr@20 : 0.3116
+Mon 01 Dec 2025 13:15:40 INFO  epoch 16 training [time: 74.07s, train loss: 2219.2529]
+Mon 01 Dec 2025 13:15:44 INFO  epoch 16 evaluating [time: 4.18s, valid_score: 0.311900]
+Mon 01 Dec 2025 13:15:44 INFO  valid result: 
+recall@20 : 0.699    mrr@20 : 0.3119
+Mon 01 Dec 2025 13:16:58 INFO  epoch 17 training [time: 74.01s, train loss: 2217.9138]
+Mon 01 Dec 2025 13:17:02 INFO  epoch 17 evaluating [time: 4.24s, valid_score: 0.312400]
+Mon 01 Dec 2025 13:17:02 INFO  valid result: 
+recall@20 : 0.699    mrr@20 : 0.3124
+Mon 01 Dec 2025 13:17:02 INFO  Saving current: saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:18:16 INFO  epoch 18 training [time: 74.01s, train loss: 2216.2853]
+Mon 01 Dec 2025 13:18:21 INFO  epoch 18 evaluating [time: 4.32s, valid_score: 0.312200]
+Mon 01 Dec 2025 13:18:21 INFO  valid result: 
+recall@20 : 0.6989    mrr@20 : 0.3122
+Mon 01 Dec 2025 13:19:35 INFO  epoch 19 training [time: 73.87s, train loss: 2215.7106]
+Mon 01 Dec 2025 13:19:39 INFO  epoch 19 evaluating [time: 4.35s, valid_score: 0.311600]
+Mon 01 Dec 2025 13:19:39 INFO  valid result: 
+recall@20 : 0.6991    mrr@20 : 0.3116
+Mon 01 Dec 2025 13:19:39 INFO  Loading model structure and parameters from saved/COREtrm-Dec-01-2025_12-53-42.pth
+Mon 01 Dec 2025 13:19:44 INFO  best valid : OrderedDict([('recall@20', 0.699), ('mrr@20', 0.3124)])
+Mon 01 Dec 2025 13:19:44 INFO  test result: OrderedDict([('recall@20', 0.6468), ('mrr@20', 0.2828)])

@@ -4,11 +4,14 @@ alias_of_item_id: [item_id_list]
 load_col:
   inter: [session_id, item_id_list, item_id]
 
-topk: [10, 20]
+topk: [20]
 metrics: [Recall, MRR]
 valid_metric: MRR@20
 eval_batch_size: 2048
 stopping_step: 5
+# Use GPU and run for a reasonable number of epochs (change as needed)
+epochs: 20
+device: cuda
 eval_args:
   order: TO
   split:

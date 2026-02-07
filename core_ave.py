@@ -16,6 +16,8 @@ class COREave(SequentialRecommender):
 
         self.sess_dropout = nn.Dropout(config['sess_dropout'])
         self.item_dropout = nn.Dropout(config['item_dropout'])
+        
+        # --- תיקון: טמפרטורה קבועה (בדיוק הערך מהקונפיגורציה) ---
         self.temperature = config['temperature']
 
         # item embedding
@@ -57,12 +59,24 @@ class COREave(SequentialRecommender):
         all_item_emb = self.item_dropout(all_item_emb)
         # Robust Distance Measuring (RDM)
         all_item_emb = F.normalize(all_item_emb, dim=-1)
+        
+        # --- שימוש בטמפרטורה קבועה ללא Softplus ---
         logits = torch.matmul(seq_output, all_item_emb.transpose(0, 1)) / self.temperature
+        
         loss = self.loss_fct(logits, pos_items)
         return loss
 
     def predict(self, interaction):
-        pass
+        item_seq = interaction[self.ITEM_SEQ]
+        seq_output = self.forward(item_seq)
+        item = interaction[self.ITEM_ID]
+
+        test_item_emb = self.item_embedding(item)
+        test_item_emb = F.normalize(test_item_emb, dim=-1)
+        
+        # --- שימוש בטמפרטורה קבועה ---
+        scores = torch.sum(seq_output * test_item_emb, dim=-1) / self.temperature
+        return scores
 
     def full_sort_predict(self, interaction):
         item_seq = interaction[self.ITEM_SEQ]
@@ -70,5 +84,7 @@ class COREave(SequentialRecommender):
         test_item_emb = self.item_embedding.weight
         # no dropout for evaluation
         test_item_emb = F.normalize(test_item_emb, dim=-1)
+        
+        # --- שימוש בטמפרטורה קבועה ---
         scores = torch.matmul(seq_output, test_item_emb.transpose(0, 1)) / self.temperature
         return scores
