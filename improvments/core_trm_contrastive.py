@@ -13,10 +13,10 @@ class COREtrmContrastive(COREtrm):
 
     def __init__(self, config, dataset):
         super().__init__(config, dataset)
-        self.use_contrastive = config['use_contrastive'] if 'use_contrastive' in config else True
-        self.cl_weight = config['cl_weight'] if 'cl_weight' in config else 0.1
-        self.cl_dropout = config['cl_dropout'] if 'cl_dropout' in config else 0.2
-        self.cl_temperature = config['cl_temperature'] if 'cl_temperature' in config else 0.2
+        self.use_contrastive = config.get('use_contrastive', True)
+        self.cl_weight = config.get('cl_weight', 0.1)
+        self.cl_dropout = config.get('cl_dropout', 0.2)
+        self.cl_temperature = config.get('cl_temperature', 0.2)
         if not 0 <= self.cl_dropout < 1:
             raise ValueError(f'cl_dropout must be in [0, 1), got {self.cl_dropout}.')
 
