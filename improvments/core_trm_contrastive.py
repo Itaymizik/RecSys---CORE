@@ -18,7 +18,7 @@ class COREtrmContrastive(COREtrm):
         self.cl_dropout = config['cl_dropout'] if 'cl_dropout' in config else 0.2
         self.cl_temperature = config['cl_temperature'] if 'cl_temperature' in config else 0.2
         if not 0 <= self.cl_dropout < 1:
-            raise ValueError('cl_dropout must be in [0, 1).')
+            raise ValueError(f'cl_dropout must be in [0, 1), got {self.cl_dropout}.')
 
     def augment_item_seq(self, item_seq):
         if self.cl_dropout == 0:
@@ -27,9 +27,11 @@ class COREtrmContrastive(COREtrm):
         mask = item_seq.gt(0)
         if not mask.any():
             return item_seq
+        seq_lengths = mask.sum(dim=1)
+        if (seq_lengths <= 1).all():
+            return item_seq
         drop_prob = torch.rand_like(item_seq.float())
         drop_mask = (drop_prob < self.cl_dropout) & mask
-        seq_lengths = mask.sum(dim=1)
         last_pos = (seq_lengths - 1).clamp(min=0)
         # Preserve the last item so the augmented view keeps the prediction target.
         drop_mask[torch.arange(item_seq.size(0), device=item_seq.device), last_pos] = False
