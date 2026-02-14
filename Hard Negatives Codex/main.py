@@ -1,0 +1,105 @@
+import argparse
+import os
+from logging import getLogger
+
+from recbole.config import Config
+from recbole.data import create_dataset, data_preparation
+from recbole.utils import get_trainer, init_logger, init_seed, set_color
+
+from core_ave import COREave
+from core_trm import COREtrm
+
+
+MODEL_REGISTRY = {
+    'ave': (COREave, 'core_ave.yaml'),
+    'trm': (COREtrm, 'core_trm.yaml'),
+}
+
+
+def str2bool(value):
+    if isinstance(value, bool):
+        return value
+    lowered = str(value).lower()
+    if lowered in {'true', '1', 'yes', 'y'}:
+        return True
+    if lowered in {'false', '0', 'no', 'n'}:
+        return False
+    raise argparse.ArgumentTypeError(f'Invalid boolean value: {value}')
+
+
+def run_single_model(args):
+    if args.model not in MODEL_REGISTRY:
+        raise ValueError(f"Unknown model '{args.model}'. Use one of: {', '.join(MODEL_REGISTRY)}")
+
+    model_class, model_cfg = MODEL_REGISTRY[args.model]
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    config = Config(
+        model=model_class,
+        dataset=args.dataset,
+        config_file_list=[
+            os.path.join(base_dir, 'props', 'overall.yaml'),
+            os.path.join(base_dir, 'props', model_cfg),
+        ],
+    )
+
+    # Runtime overrides
+    if args.temperature is not None:
+        config['temperature'] = float(args.temperature)
+    if args.item_dropout is not None:
+        config['item_dropout'] = float(args.item_dropout)
+    if args.use_hard_negatives is not None:
+        config['use_hard_negatives'] = bool(args.use_hard_negatives)
+    if args.hard_neg_k is not None:
+        config['hard_neg_k'] = int(args.hard_neg_k)
+    if args.hard_neg_lambda is not None:
+        config['hard_neg_lambda'] = float(args.hard_neg_lambda)
+
+    init_seed(config['seed'], config['reproducibility'])
+    init_logger(config)
+    logger = getLogger()
+    logger.info(config)
+
+    dataset = create_dataset(config)
+    logger.info(dataset)
+
+    train_data, valid_data, test_data = data_preparation(config, dataset)
+
+    model = model_class(config, train_data.dataset).to(config['device'])
+    logger.info(model)
+
+    trainer = get_trainer(config['MODEL_TYPE'], config['model'])(config, model)
+
+    best_valid_score, best_valid_result = trainer.fit(
+        train_data,
+        valid_data,
+        saved=True,
+        show_progress=config['show_progress'],
+    )
+
+    test_result = trainer.evaluate(test_data, load_best_model=True, show_progress=config['show_progress'])
+
+    logger.info(set_color('best valid ', 'yellow') + f': {best_valid_result}')
+    logger.info(set_color('test result', 'yellow') + f': {test_result}')
+
+    return {
+        'best_valid_score': best_valid_score,
+        'valid_score_bigger': config['valid_metric_bigger'],
+        'best_valid_result': best_valid_result,
+        'test_result': test_result,
+    }
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model', type=str, default='trm', help='ave, trm')
+    parser.add_argument('--dataset', type=str, default='diginetica', help='diginetica, nowplaying, retailrocket, tmall, yoochoose')
+    parser.add_argument('--temperature', type=float, default=None, help='Override temperature')
+    parser.add_argument('--item-dropout', dest='item_dropout', type=float, default=None, help='Override item dropout')
+
+    parser.add_argument('--use-hard-negatives', type=str2bool, default=None, help='Enable/disable hard negatives')
+    parser.add_argument('--hard-neg-k', type=int, default=None, help='Top-K hard negatives to mine per session')
+    parser.add_argument('--hard-neg-lambda', type=float, default=None, help='Hybrid loss weight lambda in [0,1]')
+
+    args, _ = parser.parse_known_args()
+    run_single_model(args)
