@@ -11,6 +11,10 @@ from improvments.core_trm_enhanced import COREtrmEnhanced
 from improvments.core_trm_dual_attention import COREtrmDualAttention
 from improvments.core_trm_enhanced_pe import COREtrmEnhancedPE
 from improvments.core_trm_hard_negatives import COREtrmHardNeg
+from improvments.core_trm_opt import COREtrmOpt
+from improvments.sam_trainer import SAMTrainer
+from improvments.core_trm_modern import COREtrmModern
+from improvments.core_trm_cl import COREtrmCL
 
 
 def run_single_model(args):
@@ -27,10 +31,16 @@ def run_single_model(args):
         model_class = COREtrmEnhancedPE
     elif args.model == 'trm_hard_negatives':
         model_class = COREtrmHardNeg
+    elif args.model == 'trm_opt':
+        model_class = COREtrmOpt
+    elif args.model == 'trm_modern':
+        model_class = COREtrmModern
+    elif args.model == 'trm_cl':
+        model_class = COREtrmCL
     else:
         model_class = COREtrm
     
-    config_file = f'props/core_{args.model}.yaml' if args.model in ['ave', 'trm', 'trm_enhanced', 'trm_dual_attention', 'trm_enhanced_pe', 'trm_hard_negatives'] else 'props/core_trm.yaml'
+    config_file = f'props/core_{args.model}.yaml' if args.model in ['ave', 'trm', 'trm_enhanced', 'trm_dual_attention', 'trm_enhanced_pe', 'trm_hard_negatives', 'trm_opt', 'trm_modern', 'trm_cl'] else 'props/core_trm.yaml'
     
     config = Config(
         model=model_class,
@@ -72,11 +82,21 @@ def run_single_model(args):
             model = COREtrmEnhancedPE(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_hard_negatives':
             model = COREtrmHardNeg(cfg, train_data.dataset).to(cfg['device'])
+        elif args.model == 'trm_opt':
+            model = COREtrmOpt(cfg, train_data.dataset).to(cfg['device'])
+        elif args.model == 'trm_modern':
+            model = COREtrmModern(cfg, train_data.dataset).to(cfg['device'])
+        elif args.model == 'trm_cl':
+            model = COREtrmCL(cfg, train_data.dataset).to(cfg['device'])
         else:
-            raise ValueError('model can only be "ave", "trm", "trm_enhanced", "trm_dual_attention", "trm_enhanced_pe", or "trm_hard_negatives".')
+            raise ValueError('model must be visible in run_single_model')
         logger.info(model)
 
-        trainer = get_trainer(cfg['MODEL_TYPE'], cfg['model'])(cfg, model)
+        # Use Custom SAMTrainer if model is trm_opt
+        if args.model == 'trm_opt':
+            trainer = SAMTrainer(cfg, model)
+        else:
+            trainer = get_trainer(cfg['MODEL_TYPE'], cfg['model'])(cfg, model)
 
         best_valid_score, best_valid_result = trainer.fit(
             train_data, valid_data, saved=True, show_progress=cfg['show_progress']
@@ -136,7 +156,7 @@ def run_single_model(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, default='trm', help='ave, trm, trm_enhanced, trm_dual_attention, trm_enhanced_pe, or trm_hard_negatives')
+    parser.add_argument('--model', type=str, default='trm', help='ave, trm, trm_enhanced, trm_dual_attention, trm_enhanced_pe, trm_hard_negatives, trm_opt, trm_modern, or trm_cl')
     parser.add_argument('--dataset', type=str, default='diginetica', help='diginetica, nowplaying, retailrocket, tmall, yoochoose')
     parser.add_argument('--sweep-dropout', dest='sweep_dropout', action='store_true', help='If set, sweep item_dropout over predefined rhos')
     parser.add_argument('--temperature', type=float, default=None, help='Override temperature (tau) in config')
