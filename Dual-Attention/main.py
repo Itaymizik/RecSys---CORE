@@ -31,6 +31,7 @@ def run_single_model(args):
             os.path.join(base_dir, 'props', 'overall.yaml'),
             os.path.join(base_dir, 'props', model_cfg),
         ],
+        config_dict={'train_neg_sample_args': None},
     )
 
     if args.temperature is not None:
