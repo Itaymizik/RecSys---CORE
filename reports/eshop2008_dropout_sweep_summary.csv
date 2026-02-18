@@ -1,0 +1,17 @@
+architecture,item_dropout,best_valid_recall20,best_valid_mrr20,test_recall20,test_mrr20,log_file
+core_trm,0.15,0.6774,0.1831,0.6784,0.1889,results/run_core_trm_eshop2008_dropout_0.15.log
+dual_attention,0.15,0.6775,0.1829,0.6761,0.1882,results/run_dual_attention_eshop2008_dropout_0.15.log
+hard_negatives,0.15,0.6761,0.1822,0.6783,0.1882,results/run_hard_negatives_eshop2008_dropout_0.15.log
+dual_attention_hard_negatives,0.15,0.675,0.1821,0.6781,0.1878,results/run_dual_attention_hard_negatives_eshop2008_dropout_0.15.log
+core_trm,0.20,0.6758,0.183,0.6785,0.189,results/run_core_trm_eshop2008_dropout_0.20.log
+dual_attention,0.20,0.6768,0.1828,0.6769,0.1874,results/run_dual_attention_eshop2008_dropout_0.20.log
+hard_negatives,0.20,0.677,0.182,0.6789,0.1886,results/run_hard_negatives_eshop2008_dropout_0.20.log
+dual_attention_hard_negatives,0.20,0.6744,0.181,0.6784,0.1863,results/run_dual_attention_hard_negatives_eshop2008_dropout_0.20.log
+core_trm,0.25,0.6758,0.1829,0.6785,0.1887,results/run_core_trm_eshop2008_dropout_0.25.log
+dual_attention,0.25,0.677,0.1821,0.6769,0.1879,results/run_dual_attention_eshop2008_dropout_0.25.log
+hard_negatives,0.25,0.6772,0.182,0.6788,0.1881,results/run_hard_negatives_eshop2008_dropout_0.25.log
+dual_attention_hard_negatives,0.25,0.6779,0.1814,0.6774,0.1871,results/run_dual_attention_hard_negatives_eshop2008_dropout_0.25.log
+core_trm,0.30,0.6765,0.1829,0.6791,0.1883,results/run_core_trm_eshop2008_dropout_0.30.log
+dual_attention,0.30,0.6773,0.1814,0.6772,0.1863,results/run_dual_attention_eshop2008_dropout_0.30.log
+hard_negatives,0.30,0.6771,0.1822,0.6783,0.1877,results/run_hard_negatives_eshop2008_dropout_0.30.log
+dual_attention_hard_negatives,0.30,0.6772,0.1804,0.678,0.1863,results/run_dual_attention_hard_negatives_eshop2008_dropout_0.30.log
