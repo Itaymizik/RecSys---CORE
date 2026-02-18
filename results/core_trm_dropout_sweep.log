@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "main.py", line 3, in <module>
+    from recbole.config import Config
+  File "/home/itaymizi/.conda/envs/core_env/lib/python3.7/site-packages/recbole/config/__init__.py", line 1, in <module>
+    from recbole.config.configurator import Config
+  File "/home/itaymizi/.conda/envs/core_env/lib/python3.7/site-packages/recbole/config/configurator.py", line 19, in <module>
+    import torch
+  File "/home/itaymizi/.conda/envs/core_env/lib/python3.7/site-packages/torch/__init__.py", line 190, in <module>
+    from torch._C import *
+ImportError: /home/itaymizi/.conda/envs/core_env/lib/python3.7/site-packages/torch/lib/libtorch_cpu.so: undefined symbol: iJIT_IsProfilingActive
