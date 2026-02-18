@@ -1,0 +1,227 @@
+Tue 17 Feb 2026 07:08:06 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = ../dataset/retailrocket
+checkpoint_dir = saved
+show_progress = True
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 20
+train_batch_size = 2048
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 5
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'order': 'TO', 'group_by': 'None', 'mode': {'valid': 'full', 'test': 'full'}}
+repeatable = True
+metrics = ['Recall', 'MRR']
+topk = [20]
+valid_metric = MRR@20
+valid_metric_bigger = True
+eval_batch_size = 2048
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = session_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = None
+NEG_PREFIX = neg_
+load_col = {'inter': ['session_id', 'item_id_list', 'item_id']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = [0,inf)
+item_inter_num_interval = [0,inf)
+alias_of_user_id = None
+alias_of_item_id = ['item_id_list']
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = None
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+benchmark_filename = ['train', 'valid', 'test']
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+numerical_features = []
+discretization = None
+kg_reverse_r = False
+entity_kg_num_interval = [0,inf)
+relation_kg_num_interval = [0,inf)
+MODEL_TYPE = ModelType.SEQUENTIAL
+device = cuda
+neg_sampling = None
+embedding_size = 100
+inner_size = 256
+n_layers = 2
+n_heads = 2
+hidden_dropout_prob = 0.5
+attn_dropout_prob = 0.5
+hidden_act = gelu
+layer_norm_eps = 1e-12
+initializer_range = 0.02
+loss_type = CE
+sess_dropout = 0.2
+item_dropout = 0.2
+temperature = 0.07
+MODEL_INPUT_TYPE = InputType.POINTWISE
+eval_type = EvaluatorType.RANKING
+single_spec = True
+local_rank = 0
+valid_neg_sample_args = {'distribution': 'uniform', 'sample_num': 'none'}
+test_neg_sample_args = {'distribution': 'uniform', 'sample_num': 'none'}
+
+
+Tue 17 Feb 2026 07:08:18 INFO  retailrocket
+The number of users: 866397
+Average actions of users: 1.0
+The number of items: 51254
+Average actions of items: 16.916840769305868
+The number of inters: 866396
+The sparsity of the dataset: 99.99804893501816%
+Remain Fields: ['session_id', 'item_id_list', 'item_id', 'item_length']
+Tue 17 Feb 2026 07:08:27 INFO  [Training]: train_batch_size = [2048] train_neg_sample_args: [{'distribution': 'none', 'sample_num': 'none', 'alpha': 'none', 'dynamic': False, 'candidate_num': 0}]
+Tue 17 Feb 2026 07:08:27 INFO  [Evaluation]: eval_batch_size = [2048] eval_args: [{'split': {'RS': [0.8, 0.1, 0.1]}, 'order': 'TO', 'group_by': 'None', 'mode': {'valid': 'full', 'test': 'full'}}]
+Tue 17 Feb 2026 07:08:27 INFO  COREtrm(
+  (sess_dropout): Dropout(p=0.2, inplace=False)
+  (item_dropout): Dropout(p=0.2, inplace=False)
+  (item_embedding): Embedding(51254, 100, padding_idx=0)
+  (loss_fct): CrossEntropyLoss()
+  (net): TransNet(
+    (position_embedding): Embedding(50, 100)
+    (trm_encoder): TransformerEncoder(
+      (layer): ModuleList(
+        (0-1): 2 x TransformerLayer(
+          (multi_head_attention): MultiHeadAttention(
+            (query): Linear(in_features=100, out_features=100, bias=True)
+            (key): Linear(in_features=100, out_features=100, bias=True)
+            (value): Linear(in_features=100, out_features=100, bias=True)
+            (softmax): Softmax(dim=-1)
+            (attn_dropout): Dropout(p=0.5, inplace=False)
+            (dense): Linear(in_features=100, out_features=100, bias=True)
+            (LayerNorm): LayerNorm((100,), eps=1e-12, elementwise_affine=True)
+            (out_dropout): Dropout(p=0.5, inplace=False)
+          )
+          (feed_forward): FeedForward(
+            (dense_1): Linear(in_features=100, out_features=256, bias=True)
+            (dense_2): Linear(in_features=256, out_features=100, bias=True)
+            (LayerNorm): LayerNorm((100,), eps=1e-12, elementwise_affine=True)
+            (dropout): Dropout(p=0.5, inplace=False)
+          )
+        )
+      )
+    )
+    (layer_norm): LayerNorm((100,), eps=1e-12, elementwise_affine=True)
+    (dropout): Dropout(p=0.5, inplace=False)
+    (attn_scorer): Sequential(
+      (0): Linear(in_features=200, out_features=100, bias=True)
+      (1): GELU(approximate='none')
+      (2): Linear(in_features=100, out_features=1, bias=True)
+    )
+  )
+)
+Trainable parameters: 5335513
+Tue 17 Feb 2026 07:08:52 INFO  epoch 0 training [time: 22.89s, train loss: 2573.7667]
+Tue 17 Feb 2026 07:08:54 INFO  epoch 0 evaluating [time: 2.47s, valid_score: 0.382600]
+Tue 17 Feb 2026 07:08:54 INFO  valid result: 
+recall@20 : 0.5197    mrr@20 : 0.3826
+Tue 17 Feb 2026 07:08:54 INFO  Saving current: saved/COREtrm-Feb-17-2026_07-08-27.pth
+Tue 17 Feb 2026 07:09:43 INFO  epoch 1 training [time: 48.74s, train loss: 1898.3922]
+Tue 17 Feb 2026 07:09:47 INFO  epoch 1 evaluating [time: 4.40s, valid_score: 0.395900]
+Tue 17 Feb 2026 07:09:47 INFO  valid result: 
+recall@20 : 0.5906    mrr@20 : 0.3959
+Tue 17 Feb 2026 07:09:48 INFO  Saving current: saved/COREtrm-Feb-17-2026_07-08-27.pth
+Tue 17 Feb 2026 07:10:42 INFO  epoch 2 training [time: 54.73s, train loss: 1622.4419]
+Tue 17 Feb 2026 07:10:47 INFO  epoch 2 evaluating [time: 4.76s, valid_score: 0.398800]
+Tue 17 Feb 2026 07:10:47 INFO  valid result: 
+recall@20 : 0.6171    mrr@20 : 0.3988
+Tue 17 Feb 2026 07:10:47 INFO  Saving current: saved/COREtrm-Feb-17-2026_07-08-27.pth
+Tue 17 Feb 2026 07:11:42 INFO  epoch 3 training [time: 54.99s, train loss: 1503.9607]
+Tue 17 Feb 2026 07:11:47 INFO  epoch 3 evaluating [time: 4.45s, valid_score: 0.401500]
+Tue 17 Feb 2026 07:11:47 INFO  valid result: 
+recall@20 : 0.6284    mrr@20 : 0.4015
+Tue 17 Feb 2026 07:11:47 INFO  Saving current: saved/COREtrm-Feb-17-2026_07-08-27.pth
+Tue 17 Feb 2026 07:12:38 INFO  epoch 4 training [time: 50.70s, train loss: 1444.5227]
+Tue 17 Feb 2026 07:12:41 INFO  epoch 4 evaluating [time: 3.40s, valid_score: 0.400700]
+Tue 17 Feb 2026 07:12:41 INFO  valid result: 
+recall@20 : 0.6344    mrr@20 : 0.4007
+Tue 17 Feb 2026 07:13:20 INFO  epoch 5 training [time: 38.84s, train loss: 1410.5123]
+Tue 17 Feb 2026 07:13:22 INFO  epoch 5 evaluating [time: 2.38s, valid_score: 0.399900]
+Tue 17 Feb 2026 07:13:22 INFO  valid result: 
+recall@20 : 0.637    mrr@20 : 0.3999
+Tue 17 Feb 2026 07:13:51 INFO  epoch 6 training [time: 28.63s, train loss: 1388.8151]
+Tue 17 Feb 2026 07:13:53 INFO  epoch 6 evaluating [time: 2.35s, valid_score: 0.401900]
+Tue 17 Feb 2026 07:13:53 INFO  valid result: 
+recall@20 : 0.638    mrr@20 : 0.4019
+Tue 17 Feb 2026 07:13:53 INFO  Saving current: saved/COREtrm-Feb-17-2026_07-08-27.pth
+Tue 17 Feb 2026 07:14:22 INFO  epoch 7 training [time: 28.54s, train loss: 1373.5029]
+Tue 17 Feb 2026 07:14:24 INFO  epoch 7 evaluating [time: 2.48s, valid_score: 0.401900]
+Tue 17 Feb 2026 07:14:24 INFO  valid result: 
+recall@20 : 0.6383    mrr@20 : 0.4019
+Tue 17 Feb 2026 07:14:25 INFO  Saving current: saved/COREtrm-Feb-17-2026_07-08-27.pth
+Tue 17 Feb 2026 07:14:53 INFO  epoch 8 training [time: 27.98s, train loss: 1362.5960]
+Tue 17 Feb 2026 07:14:55 INFO  epoch 8 evaluating [time: 2.33s, valid_score: 0.400500]
+Tue 17 Feb 2026 07:14:55 INFO  valid result: 
+recall@20 : 0.6388    mrr@20 : 0.4005
+Tue 17 Feb 2026 07:15:23 INFO  epoch 9 training [time: 28.46s, train loss: 1353.7332]
+Tue 17 Feb 2026 07:15:26 INFO  epoch 9 evaluating [time: 2.33s, valid_score: 0.400800]
+Tue 17 Feb 2026 07:15:26 INFO  valid result: 
+recall@20 : 0.6391    mrr@20 : 0.4008
+Tue 17 Feb 2026 07:15:54 INFO  epoch 10 training [time: 28.52s, train loss: 1346.8432]
+Tue 17 Feb 2026 07:15:57 INFO  epoch 10 evaluating [time: 2.36s, valid_score: 0.400400]
+Tue 17 Feb 2026 07:15:57 INFO  valid result: 
+recall@20 : 0.6386    mrr@20 : 0.4004
+Tue 17 Feb 2026 07:16:30 INFO  epoch 11 training [time: 33.65s, train loss: 1340.3706]
+Tue 17 Feb 2026 07:16:33 INFO  epoch 11 evaluating [time: 3.06s, valid_score: 0.400200]
+Tue 17 Feb 2026 07:16:33 INFO  valid result: 
+recall@20 : 0.6393    mrr@20 : 0.4002
+Tue 17 Feb 2026 07:17:07 INFO  epoch 12 training [time: 33.61s, train loss: 1334.9472]
+Tue 17 Feb 2026 07:17:10 INFO  epoch 12 evaluating [time: 2.88s, valid_score: 0.400500]
+Tue 17 Feb 2026 07:17:10 INFO  valid result: 
+recall@20 : 0.6398    mrr@20 : 0.4005
+Tue 17 Feb 2026 07:17:40 INFO  epoch 13 training [time: 30.34s, train loss: 1331.4391]
+Tue 17 Feb 2026 07:17:42 INFO  epoch 13 evaluating [time: 2.34s, valid_score: 0.400200]
+Tue 17 Feb 2026 07:17:42 INFO  valid result: 
+recall@20 : 0.64    mrr@20 : 0.4002
+Tue 17 Feb 2026 07:17:42 INFO  Finished training, best eval result in epoch 7
+Tue 17 Feb 2026 07:17:43 INFO  Loading model structure and parameters from saved/COREtrm-Feb-17-2026_07-08-27.pth
+Tue 17 Feb 2026 07:17:45 INFO  best valid : OrderedDict([('recall@20', 0.6383), ('mrr@20', 0.4019)])
+Tue 17 Feb 2026 07:17:45 INFO  test result: OrderedDict([('recall@20', 0.618), ('mrr@20', 0.3859)])

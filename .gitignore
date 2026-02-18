@@ -7,10 +7,6 @@ env/
 venv/
 .env
 .venv/
-log/
-log_tensorboard/
-saved/
-results/
 *.pth
 .DS_Store
 .idea/
