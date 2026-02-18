@@ -7,35 +7,73 @@ from recbole.utils import init_logger, get_trainer, init_seed, set_color
 
 from core_ave import COREave
 from core_trm import COREtrm
-from improvments.core_trm_enhanced import COREtrmEnhanced
-from improvments.core_trm_dual_attention import COREtrmDualAttention
-from improvments.core_trm_enhanced_pe import COREtrmEnhancedPE
-from improvments.core_trm_hard_negatives import COREtrmHardNeg
-from improvments.core_trm_opt import COREtrmOpt
-from improvments.sam_trainer import SAMTrainer
-from improvments.core_trm_modern import COREtrmModern
-from improvments.core_trm_cl import COREtrmCL
+
+try:
+    from improvments.core_trm_enhanced import COREtrmEnhanced
+except ImportError:
+    COREtrmEnhanced = None
+try:
+    from improvments.core_trm_dual_attention import COREtrmDualAttention
+except ImportError:
+    COREtrmDualAttention = None
+try:
+    from improvments.core_trm_enhanced_pe import COREtrmEnhancedPE
+except ImportError:
+    COREtrmEnhancedPE = None
+try:
+    from improvments.core_trm_hard_negatives import COREtrmHardNeg
+except ImportError:
+    COREtrmHardNeg = None
+try:
+    from improvments.core_trm_opt import COREtrmOpt
+except ImportError:
+    COREtrmOpt = None
+try:
+    from improvments.sam_trainer import SAMTrainer
+except ImportError:
+    SAMTrainer = None
+try:
+    from improvments.core_trm_modern import COREtrmModern
+except ImportError:
+    COREtrmModern = None
+try:
+    from improvments.core_trm_cl import COREtrmCL
+except ImportError:
+    COREtrmCL = None
 
 
 def run_single_model(args):
+    def ensure_available(model_name, model_class):
+        if model_class is None:
+            raise ImportError(
+                f'Model "{model_name}" is unavailable because required module(s) are missing in ./improvments.'
+            )
+
     # configurations initialization
     if args.model == 'ave':
         model_class = COREave
     elif args.model == 'trm':
         model_class = COREtrm
     elif args.model == 'trm_enhanced':
+        ensure_available('trm_enhanced', COREtrmEnhanced)
         model_class = COREtrmEnhanced
     elif args.model == 'trm_dual_attention':
+        ensure_available('trm_dual_attention', COREtrmDualAttention)
         model_class = COREtrmDualAttention
     elif args.model == 'trm_enhanced_pe':
+        ensure_available('trm_enhanced_pe', COREtrmEnhancedPE)
         model_class = COREtrmEnhancedPE
     elif args.model == 'trm_hard_negatives':
+        ensure_available('trm_hard_negatives', COREtrmHardNeg)
         model_class = COREtrmHardNeg
     elif args.model == 'trm_opt':
+        ensure_available('trm_opt', COREtrmOpt)
         model_class = COREtrmOpt
     elif args.model == 'trm_modern':
+        ensure_available('trm_modern', COREtrmModern)
         model_class = COREtrmModern
     elif args.model == 'trm_cl':
+        ensure_available('trm_cl', COREtrmCL)
         model_class = COREtrmCL
     else:
         model_class = COREtrm
@@ -75,18 +113,25 @@ def run_single_model(args):
         elif args.model == 'trm':
             model = COREtrm(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_enhanced':
+            ensure_available('trm_enhanced', COREtrmEnhanced)
             model = COREtrmEnhanced(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_dual_attention':
+            ensure_available('trm_dual_attention', COREtrmDualAttention)
             model = COREtrmDualAttention(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_enhanced_pe':
+            ensure_available('trm_enhanced_pe', COREtrmEnhancedPE)
             model = COREtrmEnhancedPE(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_hard_negatives':
+            ensure_available('trm_hard_negatives', COREtrmHardNeg)
             model = COREtrmHardNeg(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_opt':
+            ensure_available('trm_opt', COREtrmOpt)
             model = COREtrmOpt(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_modern':
+            ensure_available('trm_modern', COREtrmModern)
             model = COREtrmModern(cfg, train_data.dataset).to(cfg['device'])
         elif args.model == 'trm_cl':
+            ensure_available('trm_cl', COREtrmCL)
             model = COREtrmCL(cfg, train_data.dataset).to(cfg['device'])
         else:
             raise ValueError('model must be visible in run_single_model')
@@ -94,6 +139,9 @@ def run_single_model(args):
 
         # Use Custom SAMTrainer if model is trm_opt
         if args.model == 'trm_opt':
+            ensure_available('trm_opt', COREtrmOpt)
+            if SAMTrainer is None:
+                raise ImportError('SAMTrainer is unavailable because required module(s) are missing in ./improvments.')
             trainer = SAMTrainer(cfg, model)
         else:
             trainer = get_trainer(cfg['MODEL_TYPE'], cfg['model'])(cfg, model)

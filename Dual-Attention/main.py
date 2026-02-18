@@ -36,6 +36,8 @@ def run_single_model(args):
 
     if args.temperature is not None:
         config['temperature'] = float(args.temperature)
+    if args.item_dropout is not None:
+        config['item_dropout'] = float(args.item_dropout)
 
     init_seed(config['seed'], config['reproducibility'])
     init_logger(config)
@@ -75,6 +77,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, default='trm_da', help='ave, trm, trm_da')
     parser.add_argument('--dataset', type=str, default='diginetica', help='diginetica, nowplaying, retailrocket, tmall, yoochoose')
     parser.add_argument('--temperature', type=float, default=None, help='Override temperature')
+    parser.add_argument('--item-dropout', dest='item_dropout', type=float, default=None, help='Override item dropout')
     args, _ = parser.parse_known_args()
 
     run_single_model(args)
