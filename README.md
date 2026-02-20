@@ -15,13 +15,31 @@ We argue that session embedding encoded by non-linear encoder is usually not in 
 <img src='asset/abs.png' width="50%">
 </div>
 
+## 🧩 Methodology & Architecture (CORE-DA / CORE-HN / CORE-DAHN)
+
+The following figures summarize (A) the end-to-end experimental pipeline we use and (B) the CORE-DAHN encoder + hybrid objective that combines dual-attention with hard-negative learning.
+
+> **Note:** Make sure the following files exist in your repo under `asset/`:
+> - `asset/DA_HN_Pipeline.png`
+> - `asset/DA_HN_Diagram.png`
+
+<div align="center">
+  <img src="DA_HN_Pipeline.png" width="95%">
+  <p><em>Figure 1: Overall experimental pipeline used in CORE-DAHN, from session construction and embedding lookup, through dual-attention + gated fusion, full-catalog scoring, hard-negative mining, optimization, and evaluation.</em></p>
+</div>
+
+<div align="center">
+  <img src="DA_HN_Diagram.png" width="95%">
+  <p><em>Figure 2: CORE-DAHN details. (A) Dual-Attention Encoder: global-context and recent-intent attentions fused via a learnable gate + residual mean pooling. (B) Hybrid objective: Cross-Entropy with the positive item plus a BPR-style term over mined hard negatives.</em></p>
+</div>
+
 ## ✨ New Features & Enhancements
 
 This repository extends the baseline CORE models (`trm` and `ave`) with architectural improvements focused on ranking-quality gains while maintaining [representation consistency](https://arxiv.org/abs/2204.11067):
 
-*   **CORE-DA (Dual Attention Mechanism)**: Enhances representation learning by computing two sets of importance weights: one capturing the global session context and another explicitly emphasizing recent intent via the last-item query. These are fused via an adaptive learnable gate.
-*   **CORE-HN (Hard Negative Mining)**: Introduces a contrastive learning approach that explicitly mines and penalizes hard negative samples (Top-K highest scoring incorrect items) to improve the quality of the embedding space. This uses a BPR-style pairwise objective added to standard cross-entropy.
-*   **CORE-DAHN (Combined Approach)**: A unified model combining both Dual Attention and Hard Negative Mining for targeted gains on specific benchmarks while preserving representation consistency.
+* **CORE-DA (Dual Attention Mechanism)**: Enhances representation learning by computing two sets of importance weights: one capturing the global session context and another explicitly emphasizing recent intent via the last-item query. These are fused via an adaptive learnable gate.
+* **CORE-HN (Hard Negative Mining)**: Introduces a contrastive learning approach that explicitly mines and penalizes hard negative samples (Top-K highest scoring incorrect items) to improve the quality of the embedding space. This uses a BPR-style pairwise objective added to standard cross-entropy.
+* **CORE-DAHN (Combined Approach)**: A unified model combining both Dual Attention and Hard Negative Mining for targeted gains on specific benchmarks while preserving representation consistency.
 
 ## 📁 Repository Structure
 
